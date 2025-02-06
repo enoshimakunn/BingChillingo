@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Env import GEMINI_API_KEY
 
 
-class ChatbotWrapper():
+class ChatbotWrapper:
     def __init__(self, api_key: str):
         self.bot = genai.Client(api_key=api_key)
         
@@ -20,7 +20,7 @@ class ChatbotWrapper():
         response = response.split("：")[-1].strip()
         return response
 
-class Conversation():
+class Conversation:
     def __init__(
         self, 
         chatbot: ChatbotWrapper = None,
