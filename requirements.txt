@@ -1,3 +1,6 @@
 google-genai
 azure-cognitiveservices-speech
 elevenlabs
+sqlalchemy
+psycopg2-binary
+sqlalchemy-utils
