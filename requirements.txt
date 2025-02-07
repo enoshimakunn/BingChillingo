@@ -4,3 +4,4 @@ elevenlabs
 sqlalchemy
 psycopg2-binary
 sqlalchemy-utils
+streamlit
