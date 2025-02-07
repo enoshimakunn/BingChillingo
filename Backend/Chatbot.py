@@ -20,10 +20,10 @@ class ChatbotWrapper:
         response = response.split("：")[-1].strip()
         return response
 
-class Conversation:
+class ChatConversation:
     def __init__(
         self, 
-        chatbot: ChatbotWrapper = None,
+        chatbot: ChatbotWrapper = ChatbotWrapper(GEMINI_API_KEY),
         rounds: int = 5, 
         vocab: List[str] = []
     ):
@@ -83,6 +83,6 @@ class Conversation:
 
 if __name__ == "__main__":
     bot = ChatbotWrapper(api_key=GEMINI_API_KEY)
-    c = Conversation(bot, 5, ["你好", "再见", "谢谢"])
+    c = ChatConversation(bot, 5, ["你好", "再见", "谢谢"])
     
     c.converse()
