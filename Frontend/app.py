@@ -127,6 +127,9 @@ def chat_layout():
                 st.session_state['rounds'] = 0
                 st.session_state['assessment'] = []
             
+            if not os.path.exists("Samples"):
+                os.mkdir("Samples")
+                
             tts.generate(sys_reply, out_path="Samples/test.mp3")
             url = simli.audio_to_video(
                 "679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3"
