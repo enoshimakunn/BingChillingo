@@ -18,16 +18,27 @@ class ASR:
         self.user_id = user_id
         # self.store = Store() if user_id else None
         
+        pronunciation_config = speechsdk.PronunciationAssessmentConfig( 
+            reference_text="", 
+            grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark, 
+            granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme, 
+            enable_miscue=False) 
+        pronunciation_config.enable_prosody_assessment() 
+        pronunciation_config.enable_content_assessment_with_topic("greeting")
+        
+        pronunciation_config.apply_to(self.speech_recognizer)
+        
     def recognize_from_microphone(self):
         print("Speak into your microphone.")
         speech_recognition_result = self.speech_recognizer.recognize_once_async().get()
+        pronunciation_assessment_result_json = speech_recognition_result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
+
+        print("JSON: {}".format(pronunciation_assessment_result_json))
         
         recognized_text = ""
-        confidence_score = 0.0
         
         if speech_recognition_result.reason == speechsdk.ResultReason.RecognizedSpeech:
             recognized_text = speech_recognition_result.text
-            confidence_score = 1.0  # Azure doesn't provide confidence scores directly
             print("Recognized: {}".format(recognized_text))
             
             # Store in database if user_id is provided
@@ -43,18 +54,11 @@ class ASR:
                 print("Error details: {}".format(cancellation_details.error_details))
                 print("Did you set the speech resource key and region values?")
         
-        return recognized_text
+        return [recognized_text, pronunciation_assessment_result_json]
 
     # def __del__(self):
     #     if self.store:
     #         self.store.close()
-
-class Analytics:
-    def __init__(self):
-        pass
-    
-    def analyze(self):
-        return NotImplementedError
 
 
 if __name__ == "__main__":

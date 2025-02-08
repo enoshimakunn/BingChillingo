@@ -27,12 +27,22 @@ class SimliAPI:
 
     def generate_face_id(self, image_path, face_name="untitled_avatar"):
         url = f"{self.base_url}/generateFaceID"
-        files = {"image": open(image_path, "rb")}
-        data = {"face_name": face_name}
-        headers = {"api-key": self.api_key}
+        # files = {"image": open(image_path, "rb")}
+        # data = {"face_name": face_name}
+        # headers = {"api-key": self.api_key}
 
-        response = requests.post(url, headers=headers, files=files, data=data)
-        response_data = response.json()
+        # response = requests.post(url, headers=headers, files=files, data=data)
+        # response_data = response.json()
+        
+        payload = open(image_path, "rb")
+        querystring = {"face_name":"asdf"}
+        headers = {
+            "api-key": "<api-key>",
+            "Content-Type": "multipart/form-data"
+        }
+
+        response_data = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+
 
         if "faceId" in response_data:
             return response_data["faceId"]
@@ -62,7 +72,7 @@ class SimliAPI:
     
 if __name__ == "__main__":
     api = SimliAPI(SIMLI_API_KEY)
-    image_path = "Samples/1.jpg"
+    image_path = "Samples/1.png"
     face_id = api.generate_face_id(image_path)
 
     print(f"API Response: {face_id}")

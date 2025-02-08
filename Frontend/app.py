@@ -1,26 +1,32 @@
 import sys
 import os
 import io
+import json
 
 import streamlit as st
 import pandas as pd
-import os
-import sys
 
-from Env import XI_API_KEY
+from streamlit_elements import elements, dashboard
+
+
+from Env import XI_API_KEY, SIMLI_API_KEY
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Backend.Speech import ASR
 from Backend.Chatbot import ChatConversation
 from Backend.VoiceCloning import GenSpeech, PostVoice
+from Backend.SimliAPI import SimliAPI
+from Frontend.analysis import *
 
 
 asr = ASR()
+simli = SimliAPI(SIMLI_API_KEY)
 tts = GenSpeech(XI_API_KEY)
 
 if "conversation" not in st.session_state: st.session_state['conversation'] = ChatConversation(vocab=["你好", "再见", "谢谢"])
 if "rounds" not in st.session_state: st.session_state['rounds'] = 0
 if "transcript" not in st.session_state: st.session_state['transcript'] = []
+if "assessment" not in st.session_state: st.session_state['assessment'] = []
 
 
 def create_layout():    
@@ -58,11 +64,13 @@ def create_layout():
         # Video player placeholder
         # Note: Replace with actual video file or URL
         video_file = st.empty()
-        st.video("https://example.com/sample-video.mp4")
-        
+        # st.video("https://example.com/sample-video.mp4")
         
         if st.button(f"Click to speak"):
             stu_reply = asr.recognize_from_microphone()
+            assessment = stu_reply[1]
+            stu_reply = stu_reply[0]
+            
             st.session_state['transcript'].append("User: " + stu_reply)
             st.session_state['conversation'].context.append("学生:" + stu_reply)
             
@@ -78,36 +86,70 @@ def create_layout():
                 st.session_state['rounds'] = 0
             
             tts.generate(sys_reply, out_path="Samples/test.mp3")
-            st.audio("Samples/test.mp3", format="audio/mp3", autoplay=True)
+            url = simli.audio_to_video("679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3")["mp4_url"]
+            st.video(url, autoplay=True)
             
             st.session_state['rounds'] += 1
+            st.session_state['assessment'].append(json.loads(assessment))
         
     with right_col:
-        st.header("Commentary")
+        st.header("Assessment")
         # Add comments section
         with st.container():
-            st.text_input("Add a comment...")
-            
-            # Example comments
-            comments = [
-                {"user": "John", "text": "Great explanation at 2:15"},
-                {"user": "Sarah", "text": "Could you clarify the concept at 3:45?"}
-            ]
-            
-            for comment in comments:
-                with st.container():
-                    st.markdown(f"**{comment['user']}**")
-                    st.write(comment['text'])
-                    st.button("Reply", key=f"reply_{comment['user']}")
+            for data in st.session_state['assessment']:
+                if st.button(f"Assessment {st.session_state['assessment'].index(data) + 1}"):
+                    with elements(f"Assessment {st.session_state['assessment'].index(data) + 1}"):
+                        
+                        layout = [
+                            # First row - two charts
+                            dashboard.Item("accuracy_chart", 0, 0, 6, 4),  # First chart, left half
+                            dashboard.Item("fluency_chart", 6, 0, 6, 4),   # Second chart, right half
+                            
+                            # Second row - two charts
+                            dashboard.Item("completeness_chart", 0, 4, 6, 4),  # Third chart, left half
+                            dashboard.Item("prosody_chart", 6, 4, 6, 4),       # Fourth chart, right half
+                            
+                            # Third row - one centered chart
+                            dashboard.Item("pronunciation_chart", 3, 8, 6, 4),  # Fifth chart, centered
+                        ]
+                        
+                        with dashboard.Grid(layout):
+                            with elements("accuracy_chart"):
+                                st.plotly_chart(create_gauge_chart(
+                                    data['NBest'][0]['PronunciationAssessment']['AccuracyScore'], 
+                                    "Accuracy Score"
+                                ), use_container_width=True)
+                            
+                            with elements("fluency_chart"):
+                                st.plotly_chart(create_gauge_chart(
+                                    data['NBest'][0]['PronunciationAssessment']['FluencyScore'], 
+                                    "Fluency Score"
+                                ), use_container_width=True)
+                            
+                            # Second row
+                            with elements("completeness_chart"):
+                                st.plotly_chart(create_gauge_chart(
+                                    data['NBest'][0]['PronunciationAssessment']['CompletenessScore'], 
+                                    "Completeness Score"
+                                ), use_container_width=True)
+                            
+                            with elements("prosody_chart"):
+                                st.plotly_chart(create_gauge_chart(
+                                    data['NBest'][0]['PronunciationAssessment']['ProsodyScore'], 
+                                    "Prosody Score"
+                                ), use_container_width=True)
+                            
+                            # Third row
+                            with elements("pronunciation_chart"):
+                                st.plotly_chart(create_gauge_chart(
+                                    data['NBest'][0]['PronunciationAssessment']['PronScore'], 
+                                    "Pronunciation Score"
+                                ), use_container_width=True)
+                    
     
     # Transcript section at the bottom
     st.header("Transcript")
     with st.container():
-        transcript_text = """
-        This is a sample transcript of the video content.
-        You can replace this with actual transcript data.
-        The transcript can be synchronized with the video playback.
-        """
         st.text_area("Video Transcript", value='\n'.join(st.session_state['transcript']), height=200, disabled=True)
 
 def main():
