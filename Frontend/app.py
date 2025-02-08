@@ -248,15 +248,11 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
-            st.markdown(
-                """
-                <div style="display: flex; align-items: center;">
-                    <img src="logo.png" width="50" style="margin-right: 10px;">
-                    <h1 style="margin: 0px; font-size: 24px;">Bing Chillingual</h1>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.image("logo.png", width=50)
+            with col2:
+                st.title("Bing Chillingual")
             if st.button("Dashboard", type="secondary"):
                 st.session_state["current_level"] = "Dashboard"
             st.write(f'Welcome *{st.session_state["name"]}*')
