@@ -34,8 +34,8 @@ An intelligent AI-powered platform for interactive language learning, featuring 
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/chinese-learning-assistant.git
-cd chinese-learning-assistant
+git clone https://github.com/enoshimakunn/BingChillingo.git
+cd BingChillingo
 ```
 
 2. Install dependencies
