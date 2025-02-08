@@ -65,7 +65,7 @@ if "rounds" not in st.session_state: st.session_state['rounds'] = 0
 if "transcript" not in st.session_state: st.session_state['transcript'] = []
 # if "assessment" not in st.session_state: st.session_state['assessment'] = [json.load(open('test.json', 'r'))]
 if "assessment" not in st.session_state: st.session_state['assessment'] = []
-if "current_level" not in st.session_state: st.session_state['current_level'] = levels[0]
+if "current_level" not in st.session_state: st.session_state['current_level'] = "Dashboard"
 
 
 
@@ -163,14 +163,16 @@ def chat_layout():
 
 
 def upload_and_display_image():
-    st.title("Image Upload and Display")
-    
+
     # Allow the user to upload a file (only jpg, jpeg, png are allowed)
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    image_file = st.file_uploader("Choose an image for your avatar...", type=["jpg", "jpeg", "png"])
+
+    if image_file is not None:
+        st.session_state["image_file"] = image_file
     
-    if uploaded_file is not None:
+    if st.session_state["image_file"] is not None:
         # Open the image file using Pillow (PIL)
-        image = Image.open(uploaded_file)
+        image = Image.open(st.session_state["image_file"])
         # Display the image with an optional caption and automatic width scaling
         st.image(image, caption="Uploaded Image", width=300)
 
@@ -178,9 +180,12 @@ def upload_and_display_image():
 def upload_and_play_audio():
     
     # Allow the user to upload an audio file (only mp3, wav, ogg are allowed)
-    audio_file = st.file_uploader("Choose an audio file...", type=["mp3", "wav", "ogg"])
-    
+    audio_file = st.file_uploader("Choose an audio sample for your voice...", type=["mp3", "wav", "ogg"])
+
     if audio_file is not None:
+        st.session_state["audio_file"] = audio_file
+    
+    if st.session_state["audio_file"] is not None:
         # Play the uploaded audio file
         st.audio(audio_file)
 
