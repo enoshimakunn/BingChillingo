@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import DictCursor
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
 from Env import DATABASE_URL
@@ -67,7 +67,7 @@ class Store:
                 INSERT INTO conversations (user_id, vocabulary_used, start_time)
                 VALUES (%s, %s, %s)
                 RETURNING id
-            """, (user_id, ','.join(vocabulary), datetime.now(UTC)))
+            """, (user_id, ','.join(vocabulary), datetime.now(timezone.utc)))
             conversation_id = cur.fetchone()[0]
             self.conn.commit()
             return conversation_id
@@ -78,7 +78,7 @@ class Store:
                 UPDATE conversations 
                 SET end_time = %s 
                 WHERE id = %s
-            """, (datetime.now(UTC), conversation_id))
+            """, (datetime.now(timezone.utc), conversation_id))
             self.conn.commit()
 
     def save_message(self, conversation_id: int, content: str, is_user: bool):
@@ -86,7 +86,7 @@ class Store:
             cur.execute("""
                 INSERT INTO messages (conversation_id, content, is_user, timestamp)
                 VALUES (%s, %s, %s, %s)
-            """, (conversation_id, content, is_user, datetime.now(UTC)))
+            """, (conversation_id, content, is_user, datetime.now(timezone.utc)))
             self.conn.commit()
 
     def save_speech_record(self, user_id: int, text: str, confidence_score: float):

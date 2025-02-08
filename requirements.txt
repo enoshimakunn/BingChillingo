@@ -2,6 +2,6 @@ google-genai
 azure-cognitiveservices-speech
 elevenlabs
 sqlalchemy
-psycopg2-binary
+psycopg2-binary==2.9.9
 sqlalchemy-utils
 streamlit
