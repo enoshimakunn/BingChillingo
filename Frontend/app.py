@@ -121,9 +121,7 @@ def chat_layout():
             if st.session_state['rounds'] == st.session_state['conversation'].rounds:
                 assess = st.session_state['conversation'].assess(st.session_state['assessment'])
                 feedback(assess)
-                empty_state()
-
-            
+                empty_state()         
 
     with right_col:
         st.header("Assessment")
@@ -245,6 +243,11 @@ def create_layout():
         dashboard()
     else:
         st.title(st.session_state["current_level"])
+        
+        with st.expander("📖 New Words"):
+            st.markdown("asdf")
+            st.markdown("ghjkl")
+        
         chat_layout()
 
     with st.sidebar:
