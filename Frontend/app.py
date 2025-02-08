@@ -72,7 +72,8 @@ if "current_level" not in st.session_state: st.session_state['current_level'] = 
 if "image_file" not in st.session_state: st.session_state["image_file"] = None
 if "audio_file" not in st.session_state: st.session_state["audio_file"] = None
 if "face_id" not in st.session_state: st.session_state["face_id"] = "679fc967-ae0c-4824-a426-03eea6161c72"
-if "voice_id" not in st.session_state: st.session_state["voice_id"] = "KYKd9of0fJ9XG7bcwvmD"
+if "voice_id" not in st.session_state: st.session_state["voice_id"] = "WGIt24BEIrlyobxX1pOR"
+if "url" not in st.session_state: st.session_state["url"] = None
 
 
 def empty_state():
@@ -121,12 +122,22 @@ def chat_layout():
             url = simli.audio_to_video(
                 st.session_state["face_id"], "Samples/test.mp3"
             )["mp4_url"]
-            st.video(url, autoplay=True)
-            
+
+            if url:
+                st.session_state["url"] = url
+
             if st.session_state['rounds'] == st.session_state['conversation'].rounds:
                 assess = st.session_state['conversation'].assess(st.session_state['assessment'])
                 feedback(assess)
-                empty_state()         
+                empty_state()
+
+            st.video(st.session_state["url"], autoplay=True)
+            
+        st.write("Last video URL: ", st.session_state.get("url", "No video URL generated yet"))
+        if st.checkbox("Click if Video does not Play"):
+            st.video(st.session_state["url"], autoplay=True)
+        else:
+            st.write("Click the button above to play the video")
 
     with right_col:
         st.header("Assessment")
@@ -219,7 +230,7 @@ def start_conversation(avatar_name, selected_level):
 
 
 def dashboard():
-    st.title("Bing Chillingual - Your customized language teacher!")
+    st.title("Bing Chillingo - Your customized language teacher!")
     st.write(f'Welcome *{st.session_state["name"]}*')
 
     avatar_name = upload_avatar_name()
@@ -253,12 +264,12 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
-            image = Image.open("logo.png")
+            image = Image.open("Frontend/chillno_logo_white.jpg")
             col1, col2 = st.columns([1, 3])
             with col1:
                 st.image(image, width=50)
             with col2:
-                st.title("Bing Chillingual")
+                st.title("Bing Chillingo")
             if st.button("Dashboard", type="secondary"):
                 st.session_state["current_level"] = "Dashboard"
             st.write(f'Welcome *{st.session_state["name"]}*')
