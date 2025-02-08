@@ -63,19 +63,9 @@ python -c "from Backend.Store import Store; Store()"
 
 ## 💻 Usage
 
-1. Start the application
+Start the application
 ```bash
 streamlit run Frontend/app.py
-```
-
-2. Test the chatbot functionality
-```bash
-python test_chatbot.py
-```
-
-3. View conversation history
-```bash
-python test_view_history.py
 ```
 
 ## 🏗️ Architecture
