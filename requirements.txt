@@ -13,3 +13,4 @@ pydub
 plotly
 pipecat-ai
 simli-ai
+streamlit_authenticator
