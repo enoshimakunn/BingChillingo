@@ -1,4 +1,6 @@
-# 🎓 Chinese Language Learning Assistant
+# 🎓 Chillno - Chinese Language Learning Assistant
+
+![Chillno Logo](./Frontend/chillno_logo_black.jpg)
 
 An intelligent AI-powered platform for interactive Chinese language learning, featuring real-time conversation practice, pronunciation assessment, and personalized learning paths.
 
