@@ -211,7 +211,7 @@ def choose_language_level():
 def start_conversation(avatar_name, selected_level):
     if st.button(f"Start Conversation with {avatar_name}🚀"):
         st.session_state["current_level"] = selected_level
-        st.experimental_rerun()
+        st.rerun()
 
 
 def dashboard():
