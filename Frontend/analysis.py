@@ -104,6 +104,10 @@ def render_radar_chart(data, assessment_index):
                 }
             }
         )
+        
+@st.dialog("Your Feedback!")
+def feedback(comment: str):
+    st.write(comment)
 
 def main():
     st.set_page_config(layout="wide")

@@ -56,6 +56,13 @@ class ChatConversation:
         老师：
         """
         
+        self.assess_template = """
+        Please summarize the content of this conversation and the pronunciation evaluation indicators, and make a summary of the situation of the student using a friendly tone.
+        **Please respond in English**
+        {context}
+        {metrics}
+        """
+        
     def respond(self, if_end=False):
         prompt = self.prompt_template.format(vocab='、'.join(self.vocab), context='\n'.join(self.context))
         
@@ -67,6 +74,11 @@ class ChatConversation:
         if self.store and self.conversation_id:
             self.store.save_message(self.conversation_id, response, is_user=False)
         
+        return response
+    
+    def assess(self, metrics):
+        prompt = self.assess_template.format(context='\n'.join(self.context), metrics=metrics)
+        response = self.bot.respond(prompt)
         return response
         
     def converse(self):

@@ -58,17 +58,19 @@ asr = ASR()
 simli = SimliAPI(SIMLI_API_KEY)
 tts = GenSpeech(XI_API_KEY)
 
-if "conversation" not in st.session_state:
-    st.session_state["conversation"] = ChatConversation(vocab=["你好", "再见", "谢谢"])
-if "rounds" not in st.session_state:
-    st.session_state["rounds"] = 0
-if "transcript" not in st.session_state:
-    st.session_state["transcript"] = []
-if "assessment" not in st.session_state:
-    st.session_state["assessment"] = []
+if "conversation" not in st.session_state: st.session_state['conversation'] = ChatConversation(rounds=2, vocab=["你好", "再见", "谢谢"])
+if "rounds" not in st.session_state: st.session_state['rounds'] = 0
+if "transcript" not in st.session_state: st.session_state['transcript'] = []
+# if "assessment" not in st.session_state: st.session_state['assessment'] = [json.load(open('test.json', 'r'))]
+if "assessment" not in st.session_state: st.session_state['assessment'] = []
 
-
-def chat_layout():
+def create_layout():    
+    # Set page config to wide mode
+    st.set_page_config(layout="wide")
+    
+    # Add title
+    st.markdown("<h1 style='text-align: center;'>Your Title Here</h1>", unsafe_allow_html=True)
+    
     # Create the main layout
     left_col, center_col, right_col = st.columns([1, 2, 1])
 
@@ -105,21 +107,26 @@ def chat_layout():
             stu_reply = asr.recognize_from_microphone()
             assessment = stu_reply[1]
             stu_reply = stu_reply[0]
-
-            st.session_state["transcript"].append("User: " + stu_reply)
-            st.session_state["conversation"].context.append("学生:" + stu_reply)
-
-            if st.session_state["rounds"] < st.session_state["conversation"].rounds:
-                sys_reply = st.session_state["conversation"].respond()
-                st.session_state["conversation"].context.append("老师:" + sys_reply)
-                st.session_state["transcript"].append("System: " + sys_reply)
-
-            elif st.session_state["rounds"] == st.session_state["conversation"].rounds:
-                sys_reply = st.session_state["conversation"].respond(if_end=True)
-                st.session_state["conversation"].context.append("老师:" + sys_reply)
-                st.session_state["transcript"].append("System: " + sys_reply)
-                st.session_state["rounds"] = 0
-
+            
+            st.session_state['transcript'].append("User: " + stu_reply)
+            st.session_state['conversation'].context.append("学生:" + stu_reply)
+            
+            if st.session_state['rounds'] < st.session_state['conversation'].rounds:
+                sys_reply = st.session_state['conversation'].respond()
+                st.session_state['conversation'].context.append("老师:" + sys_reply)
+                st.session_state['transcript'].append("System: " + sys_reply)
+                    
+            elif st.session_state['rounds'] == st.session_state['conversation'].rounds:
+                sys_reply = st.session_state['conversation'].respond(if_end=True)
+                st.session_state['conversation'].context.append("老师:" + sys_reply)
+                st.session_state['transcript'].append("System: " + sys_reply)
+                
+                assess = st.session_state['conversation'].assess(st.session_state['assessment'])
+                feedback(assess)
+                
+                st.session_state['rounds'] = 0
+                st.session_state['assessment'] = []
+            
             tts.generate(sys_reply, out_path="Samples/test.mp3")
             url = simli.audio_to_video(
                 "679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3"
