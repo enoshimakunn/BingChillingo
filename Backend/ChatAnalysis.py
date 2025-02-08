@@ -31,10 +31,10 @@ class ChatAnalysis:
         level = self.store.get_language_level(user_id)
         return self._convert_hsk_to_number(level)
     
-    def get_words_by_level(self, level: str) -> List[str]:
+    def get_words_by_group(self, level: str, group: int) -> pd.DataFrame:
         """Get the vocabulary list for the given level"""
         # level should be in number format (e.g., '1', '2', etc.)
-        words = self.word_df[self.word_df['hsk30_level'] == int(level)]['word_simplified'].tolist()
+        words = self.word_df[(self.word_df['hsk30_level'] == int(level)) & (self.word_df['Group'] == "Group " + str(group))][['word_simplified', 'cc_cedict_english_definition']]
         return words
     
     def get_chars_by_level(self, level: str) -> List[str]:

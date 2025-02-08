@@ -17,6 +17,7 @@ from Backend.Speech import ASR
 from Backend.Chatbot import ChatConversation
 from Backend.VoiceCloning import GenSpeech, PostVoice
 from Backend.SimliAPI import SimliAPI
+from Backend.ChatAnalysis import ChatAnalysis
 from Frontend.analysis import *
 
 import yaml
@@ -59,6 +60,8 @@ levels = [
 asr = ASR()
 simli = SimliAPI(SIMLI_API_KEY)
 tts = GenSpeech(XI_API_KEY)
+chatanalysis = ChatAnalysis()
+
 
 if "conversation" not in st.session_state: st.session_state['conversation'] = ChatConversation(rounds=2, vocab=["你好", "再见", "谢谢"])
 if "rounds" not in st.session_state: st.session_state['rounds'] = 0
@@ -269,9 +272,12 @@ def create_layout():
     else:
         st.title(st.session_state["current_level"])
         
+        vocab = chatanalysis.get_words_by_group("1", 2)
+        st.session_state['conversation'] = ChatConversation(rounds=2, vocab=vocab['word_simplified'].to_list())
+        
         with st.expander("📖 New Words"):
-            st.markdown("asdf")
-            st.markdown("ghjkl")
+            for _, row in vocab.iterrows():
+                st.markdown(f"**{row['word_simplified']}**: {row['cc_cedict_english_definition']}")
         
         chat_layout()
 
