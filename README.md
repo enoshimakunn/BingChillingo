@@ -1,8 +1,8 @@
-# 🎓 Chillno - Chinese Language Learning Assistant
+# 🎓 Bing Chillingo - Language Learning Assistant
 
 ![Chillno Logo](./Frontend/chillno_logo_black.jpg)
 
-An intelligent AI-powered platform for interactive Chinese language learning, featuring real-time conversation practice, pronunciation assessment, and personalized learning paths.
+An intelligent AI-powered platform for interactive language learning, featuring real-time conversation practice, pronunciation assessment, and personalized learning paths.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
@@ -10,10 +10,10 @@ An intelligent AI-powered platform for interactive Chinese language learning, fe
 
 ## ✨ Features
 
-- 🤖 **AI-Powered Conversations**: Engage in natural Chinese conversations with an AI teacher that adapts to your proficiency level
-- 🎯 **Dynamic Level Assessment**: Automatic evaluation of your Chinese language proficiency using HSK standards
+- 🤖 **AI-Powered Conversations**: Engage in natural language conversations with an AI teacher that adapts to your proficiency level
+- 🎯 **Dynamic Level Assessment**: Automatic evaluation of your language proficiency using HSK standards
 - 🗣️ **Speech Recognition**: Real-time speech recognition and pronunciation assessment powered by Azure Cognitive Services
-- 👥 **Voice Cloning**: Generate natural Chinese speech with customizable voices using ElevenLabs
+- 👥 **Voice Cloning**: Generate natural language speech with customizable voices using ElevenLabs
 - 📊 **Progress Tracking**: Monitor your learning progress with detailed conversation history and performance metrics
 - 🎮 **Interactive UI**: User-friendly interface built with Streamlit for seamless learning experience
 - 🔄 **Adaptive Learning**: Vocabulary and conversations tailored to your current HSK level
