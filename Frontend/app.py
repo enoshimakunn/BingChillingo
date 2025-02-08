@@ -269,8 +269,9 @@ def create_layout():
         
         chat_layout()
 
-    with st.sidebar:
-        authenticator.logout()
+    if st.session_state["authentication_status"]:
+        with st.sidebar:
+            authenticator.logout()
 
 
 def main():
