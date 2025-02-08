@@ -22,6 +22,8 @@ from Frontend.analysis import *
 import yaml
 from yaml.loader import SafeLoader
 
+from PIL import Image
+
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=SafeLoader)
 
@@ -68,33 +70,8 @@ if "current_level" not in st.session_state: st.session_state['current_level'] = 
 
 
 def chat_layout():    
-    # Add title
-    st.markdown("<h1 style='text-align: center;'>Your Title Here</h1>", unsafe_allow_html=True)
-    
     # Create the main layout
-    left_col, center_col, right_col = st.columns([1, 2, 1])
-
-    with left_col:
-        st.header("Learning Progress")
-        # Progress bar
-        progress = st.progress(0)
-
-        # Example metrics
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric(label="Videos Completed", value="3/10")
-        with col2:
-            st.metric(label="Time Spent", value="45 min")
-
-        # Progress details
-        with st.expander("Detailed Progress"):
-            progress_data = pd.DataFrame(
-                {
-                    "Module": ["Intro", "Basics", "Advanced"],
-                    "Status": ["Completed", "In Progress", "Not Started"],
-                }
-            )
-            st.dataframe(progress_data)
+    center_col, right_col = st.columns([3, 1])
 
     with center_col:
         st.header("Video Content")
@@ -129,7 +106,7 @@ def chat_layout():
             
             if not os.path.exists("Samples"):
                 os.mkdir("Samples")
-                
+
             tts.generate(sys_reply, out_path="Samples/test.mp3")
             url = simli.audio_to_video(
                 "679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3"
@@ -185,9 +162,38 @@ def chat_layout():
         )
 
 
-def level_selector(user_level=5):
-    st.sidebar.write("Units")
+def upload_and_display_image():
+    st.title("Image Upload and Display")
+    
+    # Allow the user to upload a file (only jpg, jpeg, png are allowed)
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file is not None:
+        # Open the image file using Pillow (PIL)
+        image = Image.open(uploaded_file)
+        # Display the image with an optional caption and automatic width scaling
+        st.image(image, caption="Uploaded Image", width=300)
 
+
+def upload_and_play_audio():
+    
+    # Allow the user to upload an audio file (only mp3, wav, ogg are allowed)
+    audio_file = st.file_uploader("Choose an audio file...", type=["mp3", "wav", "ogg"])
+    
+    if audio_file is not None:
+        # Play the uploaded audio file
+        st.audio(audio_file)
+
+
+def dashboard():
+    st.title("Bing Chillingo")
+    st.write(f'Welcome *{st.session_state["name"]}*')
+
+    upload_and_display_image()
+    upload_and_play_audio()
+
+
+def level_selector(user_level=5):
     for idx, level in enumerate(levels):
         if st.sidebar.button(
             level, type="primary" if idx <= user_level else "secondary"
@@ -210,7 +216,9 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
-            authenticator.logout()
+            st.title("Bing Chillingo")
+            if st.button("Dashboard", type="secondary"):
+                st.session_state["current_level"] = "Dashboard"
             st.write(f'Welcome *{st.session_state["name"]}*')
             level_selector()
         elif st.session_state["authentication_status"] is False:
@@ -218,10 +226,14 @@ def create_layout():
         elif st.session_state["authentication_status"] is None:
             st.warning("Please enter your username and password")
 
-    # Add title
-    st.title(st.session_state["current_level"])
+    if st.session_state["current_level"] == "Dashboard":
+        dashboard()
+    else:
+        st.title(st.session_state["current_level"])
+        chat_layout()
 
-    chat_layout()
+    with st.sidebar:
+        authenticator.logout()
 
 
 def main():
