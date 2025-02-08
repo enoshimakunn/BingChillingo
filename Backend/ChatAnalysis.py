@@ -15,36 +15,28 @@ class ChatAnalysis:
         self.char_df = pd.read_csv('Data/char.csv')
         
     def _convert_hsk_to_number(self, hsk_level: str) -> str:
-        """将 HSK 格式转换为数字格式"""
         if hsk_level.startswith('HSK'):
             return hsk_level[-1]
         return hsk_level
     
     def _convert_number_to_hsk(self, number_level: str) -> str:
-        """将数字格式转换为 HSK 格式"""
         return f"HSK{number_level}"
         
     def get_user_level(self, user_id: int) -> str:
-        """从数据库获取用户当前级别"""
         level = self.store.get_language_level(user_id)
         return level
     
     def get_words_by_level(self, level: str) -> List[str]:
-        """根据级别获取对应的词汇列表"""
         hsk_level = self._convert_number_to_hsk(level)
         words = self.word_df[self.word_df['level'] == hsk_level]['word'].tolist()
         return words
     
     def get_chars_by_level(self, level: str) -> List[str]:
-        """根据级别获取对应的汉字列表"""
         hsk_level = self._convert_number_to_hsk(level)
         chars = self.char_df[self.char_df['level'] == hsk_level]['character'].tolist()
         return chars
     
     def assess_user_level(self, user_id: int) -> Tuple[str, float]:
-        """评估用户的中文水平
-        返回: (建议级别, 置信度)
-        """
         current_level = self.get_user_level(user_id)
         
         # start the assessment conversation
