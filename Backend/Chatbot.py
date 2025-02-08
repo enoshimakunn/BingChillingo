@@ -26,12 +26,14 @@ class ChatConversation:
         chatbot: ChatbotWrapper = ChatbotWrapper(GEMINI_API_KEY),
         rounds: int = 5, 
         vocab: List[str] = [],
+        topic: str = "",
         user_id: int = None
     ):
         self.rounds = rounds
         self.bot = chatbot
         self.context = []
         self.vocab = vocab
+        self.topic = topic
         self.user_id = user_id
         self.store = Store() if user_id else None
         self.conversation_id = None
@@ -44,7 +46,7 @@ class ChatConversation:
             
         self.prompt_template = """
         现在请你扮演一个中文老师，你的学生是一个HSK{level}水平的中文学习者。
-        请使用以下词汇，领导一个简单的多轮对话。
+        请使用以下词汇，领导一个简单的多轮对话。{topic_prompt}
         词汇：{vocab}。
         **请注意，你的回答应该是中文的。**
         **请注意，每次回答需要以"老师："开头。**
@@ -67,9 +69,11 @@ class ChatConversation:
         """
         
     def respond(self, if_end=False):
+        topic_prompt = f"在{self.topic}的方面" if self.topic else ""
         prompt = self.prompt_template.format(
             level=self.language_level,
             vocab='、'.join(self.vocab), 
+            topic_prompt=topic_prompt,
             context='\n'.join(self.context)
         )
         

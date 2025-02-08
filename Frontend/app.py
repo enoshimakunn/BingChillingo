@@ -2,6 +2,7 @@ import sys
 import os
 import io
 import json
+import random
 
 import streamlit as st
 import pandas as pd
@@ -285,7 +286,14 @@ def create_layout():
         st.title(st.session_state["current_level"])
         
         vocab = chatanalysis.get_words_by_group("1", 2)
-        st.session_state['conversation'] = ChatConversation(rounds=2, vocab=vocab['word_simplified'].to_list())
+        word_list = vocab['word_simplified'].tolist()
+        # Randomly sample 8 words (or all words if less than 8 available)
+        sampled_words = random.sample(word_list, min(8, len(word_list)))
+        st.session_state['conversation'] = ChatConversation(
+            rounds=2, 
+            vocab=sampled_words, 
+            topic=st.session_state["current_level"]
+        )
         
         with st.expander("📖 New Words"):
             for _, row in vocab.iterrows():
