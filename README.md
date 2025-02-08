@@ -1,6 +1,6 @@
 # 🎓 Bing Chillingo - Language Learning Assistant
 
-![Chillno Logo](./Frontend/chillno_logo_black.jpg)
+![Chillno Logo](./Frontend/chillno_logo_white.png)
 
 An intelligent AI-powered platform for interactive language learning, featuring real-time conversation practice, pronunciation assessment, and personalized learning paths.
 
