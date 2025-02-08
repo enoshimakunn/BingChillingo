@@ -3,31 +3,69 @@ from psycopg2.extras import DictCursor
 from psycopg2.pool import SimpleConnectionPool
 from datetime import datetime, timezone
 from typing import List
+import time
 
 from Env import DATABASE_URL
 
 class Store:
-    def __init__(self):
-        # Create a connection pool instead of a single connection
-        try:
-            self.pool = SimpleConnectionPool(
-                minconn=1, 
-                maxconn=20, 
-                dsn=DATABASE_URL
-            )
-        except psycopg2.Error as e:
-            raise Exception(f"Failed to create connection pool: {str(e)}")
+    _instance = None
+    _pool = None
+    MAX_RETRIES = 3
+    RETRY_DELAY = 1  # seconds
 
-        # Initialize tables
-        self._init_tables()
-    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Store, cls).__new__(cls)
+            cls._instance._create_pool()
+        return cls._instance
+
+    def __init__(self):
+        if not hasattr(self, '_initialized'):
+            self._initialized = True
+            self._init_tables()
+
+    def _create_pool(self):
+        """Create the connection pool with retries."""
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                self._pool = SimpleConnectionPool(
+                    minconn=1, 
+                    maxconn=20, 
+                    dsn=DATABASE_URL
+                )
+                if self._pool:
+                    return
+            except psycopg2.Error as e:
+                if attempt < self.MAX_RETRIES - 1:
+                    time.sleep(self.RETRY_DELAY)
+                    continue
+                raise Exception(f"Failed to create connection pool after {self.MAX_RETRIES} attempts: {str(e)}")
+
     def _get_conn(self):
-        """Get a connection from the pool."""
-        return self.pool.getconn()
+        """Get a connection from the pool with retry logic."""
+        if not self._pool:
+            self._create_pool()
+        
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                conn = self._pool.getconn()
+                if conn:
+                    # Test the connection
+                    with conn.cursor() as cur:
+                        cur.execute('SELECT 1')
+                    return conn
+            except psycopg2.Error:
+                if attempt < self.MAX_RETRIES - 1:
+                    time.sleep(self.RETRY_DELAY)
+                    # Try to recreate the pool
+                    self._create_pool()
+                    continue
+        raise Exception("Failed to get a valid database connection")
 
     def _put_conn(self, conn):
         """Return a connection to the pool."""
-        self.pool.putconn(conn)
+        if self._pool and conn:
+            self._pool.putconn(conn)
 
     def _init_tables(self) -> None:
         """Create required tables if they do not exist."""
@@ -39,6 +77,7 @@ class Store:
                         id SERIAL PRIMARY KEY,
                         username VARCHAR(50) UNIQUE NOT NULL,
                         email VARCHAR(120) UNIQUE NOT NULL,
+                        language_level VARCHAR(20) DEFAULT '1',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
@@ -58,14 +97,6 @@ class Store:
                         is_user BOOLEAN DEFAULT TRUE,
                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     );
-
-                    CREATE TABLE IF NOT EXISTS speech_records (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER REFERENCES users(id),
-                        text TEXT NOT NULL,
-                        confidence_score FLOAT,
-                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
                 """)
                 conn.commit()
         except psycopg2.Error as e:
@@ -74,7 +105,7 @@ class Store:
         finally:
             self._put_conn(conn)
 
-    def get_or_create_user(self, username: str, email: str) -> int:
+    def get_or_create_user(self, username: str, email: str, language_level: str = '1') -> int:
         """Return user ID, creating a user record if it doesn't exist."""
         conn = self._get_conn()
         try:
@@ -83,16 +114,50 @@ class Store:
                 user = cur.fetchone()
                 if not user:
                     cur.execute("""
-                        INSERT INTO users (username, email)
-                        VALUES (%s, %s)
+                        INSERT INTO users (username, email, language_level)
+                        VALUES (%s, %s, %s)
                         RETURNING id
-                    """, (username, email))
+                    """, (username, email, language_level))
                     user = cur.fetchone()
                     conn.commit()
                 return user['id']
         except psycopg2.Error as e:
             conn.rollback()
             raise Exception(f"Error in get_or_create_user: {str(e)}")
+        finally:
+            self._put_conn(conn)
+
+    def update_language_level(self, user_id: int, new_level: str) -> None:
+        """Update user's language level."""
+        conn = self._get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE users
+                    SET language_level = %s
+                    WHERE id = %s
+                """, (new_level, user_id))
+                conn.commit()
+        except psycopg2.Error as e:
+            conn.rollback()
+            raise Exception(f"Error in update_language_level: {str(e)}")
+        finally:
+            self._put_conn(conn)
+
+    def get_language_level(self, user_id: int) -> str:
+        """Get user's current language level."""
+        conn = self._get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT language_level
+                    FROM users
+                    WHERE id = %s
+                """, (user_id,))
+                result = cur.fetchone()
+                return result[0] if result else '1'
+        except psycopg2.Error as e:
+            raise Exception(f"Error in get_language_level: {str(e)}")
         finally:
             self._put_conn(conn)
 
@@ -148,22 +213,6 @@ class Store:
         finally:
             self._put_conn(conn)
 
-    def save_speech_record(self, user_id: int, text: str, confidence_score: float) -> None:
-        """Save a speech recognition record."""
-        conn = self._get_conn()
-        try:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO speech_records (user_id, text, confidence_score)
-                    VALUES (%s, %s, %s)
-                """, (user_id, text, confidence_score))
-                conn.commit()
-        except psycopg2.Error as e:
-            conn.rollback()
-            raise Exception(f"Error in save_speech_record: {str(e)}")
-        finally:
-            self._put_conn(conn)
-
     def update_last_login(self, user_id: int) -> None:
         """
         Update the user's last_login timestamp.
@@ -186,8 +235,16 @@ class Store:
 
     def close(self) -> None:
         """Close the connection pool."""
-        if hasattr(self, 'pool') and self.pool:
-            self.pool.closeall()
+        try:
+            if self._pool:
+                self._pool.closeall()
+                self._pool = None
+        except Exception:
+            pass  # Silently handle any closure errors
 
     def __del__(self):
-        self.close()
+        try:
+            if hasattr(self, '_pool') and self._pool:
+                self.close()
+        except Exception:
+            pass  # Silently handle any cleanup errors
