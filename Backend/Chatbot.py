@@ -67,7 +67,11 @@ class ChatConversation:
         """
         
     def respond(self, if_end=False):
-        prompt = self.prompt_template.format(vocab='、'.join(self.vocab), context='\n'.join(self.context))
+        prompt = self.prompt_template.format(
+            level=self.language_level,
+            vocab='、'.join(self.vocab), 
+            context='\n'.join(self.context)
+        )
         
         if if_end and self.store and self.conversation_id:
             prompt += self.closing_template
