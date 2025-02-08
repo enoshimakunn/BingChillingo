@@ -2,6 +2,7 @@ import os
 import sys
 import pandas as pd
 from typing import List, Dict, Tuple
+from Env import GEMINI_API_KEY
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Backend.Store import Store
@@ -10,30 +11,36 @@ from Backend.Chatbot import ChatbotWrapper
 class ChatAnalysis:
     def __init__(self):
         self.store = Store()
-        self.chatbot = ChatbotWrapper()
+        self.chatbot = ChatbotWrapper(GEMINI_API_KEY)
         self.word_df = pd.read_csv('Data/word.csv')
         self.char_df = pd.read_csv('Data/char.csv')
         
     def _convert_hsk_to_number(self, hsk_level: str) -> str:
-        if hsk_level.startswith('HSK'):
-            return hsk_level[-1]
-        return hsk_level
+        """Convert HSK level format to number format (e.g., 'HSK1' or 'hsk1' to '1')"""
+        level = hsk_level.upper()
+        if level.startswith('HSK'):
+            return level[3:]
+        return level
     
     def _convert_number_to_hsk(self, number_level: str) -> str:
+        """Convert number format to HSK format (e.g., '1' to 'HSK1')"""
         return f"HSK{number_level}"
         
     def get_user_level(self, user_id: int) -> str:
+        """Get user's level in number format"""
         level = self.store.get_language_level(user_id)
-        return level
+        return self._convert_hsk_to_number(level)
     
     def get_words_by_level(self, level: str) -> List[str]:
-        hsk_level = self._convert_number_to_hsk(level)
-        words = self.word_df[self.word_df['level'] == hsk_level]['word'].tolist()
+        """Get the vocabulary list for the given level"""
+        # level should be in number format (e.g., '1', '2', etc.)
+        words = self.word_df[self.word_df['hsk30_level'] == int(level)]['word_simplified'].tolist()
         return words
     
     def get_chars_by_level(self, level: str) -> List[str]:
-        hsk_level = self._convert_number_to_hsk(level)
-        chars = self.char_df[self.char_df['level'] == hsk_level]['character'].tolist()
+        """Get the character list for the given level"""
+        # level should be in number format (e.g., '1', '2', etc.)
+        chars = self.char_df[self.char_df['level'] == int(level)]['hanzi_sc'].tolist()
         return chars
     
     def assess_user_level(self, user_id: int) -> Tuple[str, float]:
