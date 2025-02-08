@@ -66,6 +66,8 @@ if "transcript" not in st.session_state: st.session_state['transcript'] = []
 # if "assessment" not in st.session_state: st.session_state['assessment'] = [json.load(open('test.json', 'r'))]
 if "assessment" not in st.session_state: st.session_state['assessment'] = []
 if "current_level" not in st.session_state: st.session_state['current_level'] = "Dashboard"
+if "image_file" not in st.session_state: st.session_state["image_file"] = None
+if "audio_file" not in st.session_state: st.session_state["audio_file"] = None
 
 
 
