@@ -29,6 +29,16 @@ from PIL import Image
 with open("config.yaml") as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+languages = [
+    "Chinese",
+    "English",
+    "Spanish",
+    "Japanese",
+    "German",
+    "French",
+    "Portuguese",
+    "More will be supported later..."
+]
 
 levels = [
     "Unit 1.1 - Introduce Yourself",
@@ -219,6 +229,10 @@ def upload_and_play_audio():
         # Play the uploaded audio file
         st.audio(audio_file)
 
+def select_language():
+    language = st.selectbox("✨ What language do you want to learn today?", languages)
+    st.write(f"You choose: {language}. That's hard. Good luck!")
+
 def choose_language_level():
     selected_level = st.selectbox("🎯Choose your preferred conversation topic: ", levels)
     st.write(f"You have selected: {selected_level}")
@@ -237,6 +251,7 @@ def dashboard():
     avatar_name = upload_avatar_name()
     upload_and_display_avatar_img()
     upload_and_play_audio()
+    select_language()
     level = choose_language_level()
     start_conversation(avatar_name, level)
 
