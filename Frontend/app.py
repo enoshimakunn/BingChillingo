@@ -141,8 +141,6 @@ def chat_layout():
                 assess = st.session_state['conversation'].assess(st.session_state['assessment'])
                 feedback(assess)
                 empty_state()
-
-            st.video(st.session_state["url"], autoplay=True)
             
         st.write("Last video URL: ", st.session_state.get("url", "No video URL generated yet"))
         if st.session_state["url"]:
@@ -295,26 +293,32 @@ def create_layout():
         elif st.session_state["authentication_status"] is None:
             st.warning("Please enter your username and password")
 
-    if st.session_state["current_level"] == "Dashboard":
-        dashboard()
+    if st.session_state["authentication_status"]:
+        if st.session_state["current_level"] == "Dashboard":
+            dashboard()
+        else:
+            st.title(st.session_state["current_level"])
+            
+            vocab = chatanalysis.get_words_by_group("1", 2)
+            word_list = vocab['word_simplified'].tolist()
+            # Randomly sample 8 words (or all words if less than 8 available)
+            sampled_words = random.sample(word_list, min(8, len(word_list)))
+            st.session_state['conversation'] = ChatConversation(
+                rounds=2, 
+                vocab=sampled_words, 
+                topic=st.session_state["current_level"]
+            )
+            
+            with st.expander("📖 New Words"):
+                for _, row in vocab.iterrows():
+                    st.markdown(f"**{row['word_simplified']}**: {row['cc_cedict_english_definition']}")
+            
+            chat_layout()
     else:
-        st.title(st.session_state["current_level"])
-        
-        vocab = chatanalysis.get_words_by_group("1", 2)
-        word_list = vocab['word_simplified'].tolist()
-        # Randomly sample 8 words (or all words if less than 8 available)
-        sampled_words = random.sample(word_list, min(8, len(word_list)))
-        st.session_state['conversation'] = ChatConversation(
-            rounds=2, 
-            vocab=sampled_words, 
-            topic=st.session_state["current_level"]
-        )
-        
-        with st.expander("📖 New Words"):
-            for _, row in vocab.iterrows():
-                st.markdown(f"**{row['word_simplified']}**: {row['cc_cedict_english_definition']}")
-        
-        chat_layout()
+        st.title("Welcome to Bing Chillingo - Your customized language teacher!")
+        st.write("Please login to continue")
+        image = Image.open("Frontend/chillno_logo_white.png")
+        st.image(image)
 
     if st.session_state["authentication_status"]:
         with st.sidebar:
