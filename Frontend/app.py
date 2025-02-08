@@ -264,7 +264,7 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
-            image = Image.open("Frontend/chillno_logo_white.jpg")
+            image = Image.open("Frontend/chillno_logo_white.png")
             col1, col2 = st.columns([1, 3])
             with col1:
                 st.image(image, width=50)
