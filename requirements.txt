@@ -8,3 +8,4 @@ streamlit
 streamlit-webrtc 
 streamlit-server-state 
 opencv-python-headless
+pydub
