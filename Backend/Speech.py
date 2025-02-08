@@ -40,10 +40,13 @@ class ASR:
         if speech_recognition_result.reason == speechsdk.ResultReason.RecognizedSpeech:
             recognized_text = speech_recognition_result.text
             print("Recognized: {}".format(recognized_text))
+<<<<<<< HEAD
             
             # Store in database if user_id is provided
             # if self.store and self.user_id:
             #     self.store.save_speech_record(self.user_id, recognized_text, confidence_score)
+=======
+>>>>>>> backend
                 
         elif speech_recognition_result.reason == speechsdk.ResultReason.NoMatch:
             print("No speech could be recognized: {}".format(speech_recognition_result.no_match_details))
@@ -63,9 +66,15 @@ class ASR:
 
 if __name__ == "__main__":
     # Create a test user
+<<<<<<< HEAD
     # store = Store()
     # user_id = store.get_or_create_user('test_user', 'test@example.com')
     # store.close()
+=======
+    store = Store()
+    user_id = store.get_or_create_user('test_user', 'test@example.com', language_level='1')
+    store.close()
+>>>>>>> backend
 
     # Test speech recognition
     # asr = ASR(user_id=user_id)

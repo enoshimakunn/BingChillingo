@@ -38,9 +38,12 @@ class ChatConversation:
         
         if user_id:
             self.conversation_id = self.store.start_conversation(user_id, vocab)
+            self.language_level = self.store.get_language_level(user_id)
+        else:
+            self.language_level = '1'
         
         self.prompt_template = """
-        现在请你扮演一个中文老师，你的学生是一个刚刚开始学习中文的外国人。
+        现在请你扮演一个中文老师，你的学生是一个HSK{level}水平的中文学习者。
         请使用以下词汇，领导一个简单的多轮对话。
         词汇：{vocab}。
         **请注意，你的回答应该是中文的。**
@@ -57,7 +60,11 @@ class ChatConversation:
         """
         
     def respond(self, if_end=False):
-        prompt = self.prompt_template.format(vocab='、'.join(self.vocab), context='\n'.join(self.context))
+        prompt = self.prompt_template.format(
+            level=self.language_level,
+            vocab='、'.join(self.vocab), 
+            context='\n'.join(self.context)
+        )
         
         if if_end and self.store and self.conversation_id:
             prompt += self.closing_template
@@ -104,8 +111,8 @@ if __name__ == "__main__":
     bot = ChatbotWrapper(api_key=GEMINI_API_KEY)
     store = Store()
     
-    # Create a test user
-    user_id = store.get_or_create_user('test_user', 'test@example.com')
+    # Create a test user with language level
+    user_id = store.get_or_create_user('test_user', 'test@example.com', language_level='2')
     store.close()
 
     # Start conversation with database integration
