@@ -63,9 +63,9 @@ class ASR:
 
 if __name__ == "__main__":
     # Create a test user
-    # store = Store()
-    # user_id = store.get_or_create_user('test_user', 'test@example.com')
-    # store.close()
+    store = Store()
+    user_id = store.get_or_create_user('test_user', 'test@example.com', language_level='1')
+    store.close()
 
     # Test speech recognition
     # asr = ASR(user_id=user_id)
