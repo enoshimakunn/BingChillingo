@@ -14,3 +14,4 @@ plotly
 pipecat-ai
 simli-ai
 streamlit_authenticator
+pandas
