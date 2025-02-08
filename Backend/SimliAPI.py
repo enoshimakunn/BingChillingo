@@ -1,11 +1,23 @@
 import requests
 import base64
+from pydub import AudioSegment
 
 class SimliAPI:
     def __init__(self, api_key):
         self.api_key = api_key
         self.base_url = "https://api.simli.ai"
         self.headers = {"api-key": self.api_key}
+
+    def encode_audio_to_base64(self, audio_path):
+        with open(audio_path, "rb") as audio_file:
+            return base64.b64encode(audio_file.read()).decode("utf-8")
+
+    def convert_audio(self, audio_path, target_sample_rate=16000, target_channels=1):
+        audio = AudioSegment.from_file(audio_path)
+        audio = audio.set_frame_rate(target_sample_rate).set_channels(target_channels)
+        converted_path = "output_audio.wav"
+        audio.export(converted_path, format="wav")
+        return converted_path
 
     def generate_face_id(self, image_path, face_name="untitled_avatar"):
         url = f"{self.base_url}/generateFaceID"
@@ -21,11 +33,11 @@ class SimliAPI:
         else:
             raise ValueError(f"Failed to generate Face ID: {response_data}")
 
-    def audio_to_video(self, face_id, audio_path, audio_format="pcm16", sample_rate=16000, channel_count=1, video_start_frame=0):
+    def audio_to_video(self, face_id, audio_path, audio_format="pcm16", sample_rate=16000, channel_count=1, video_start_frame=0): 
         url = f"{self.base_url}/audioToVideoStream"
 
-        with open(audio_path, "rb") as audio_file:
-            audio_base64 = base64.b64encode(audio_file.read()).decode("utf-8")
+        processed_audio = self.convert_audio(audio_path)    
+        audio_base64 = self.encode_audio_to_base64(processed_audio)
 
         payload = {
             "simliAPIKey": self.api_key,
