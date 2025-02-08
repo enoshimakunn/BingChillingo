@@ -143,92 +143,36 @@ def chat_layout():
         st.header("Assessment")
         # Add comments section
         with st.container():
-            for data in st.session_state["assessment"]:
-                if st.button(
-                    f"Assessment {st.session_state['assessment'].index(data) + 1}"
-                ):
-                    with elements(
-                        f"Assessment {st.session_state['assessment'].index(data) + 1}"
-                    ):
-
-                        layout = [
-                            # First row - two charts
-                            dashboard.Item(
-                                "accuracy_chart", 0, 0, 6, 4
-                            ),  # First chart, left half
-                            dashboard.Item(
-                                "fluency_chart", 6, 0, 6, 4
-                            ),  # Second chart, right half
-                            # Second row - two charts
-                            dashboard.Item(
-                                "completeness_chart", 0, 4, 6, 4
-                            ),  # Third chart, left half
-                            dashboard.Item(
-                                "prosody_chart", 6, 4, 6, 4
-                            ),  # Fourth chart, right half
-                            # Third row - one centered chart
-                            dashboard.Item(
-                                "pronunciation_chart", 3, 8, 6, 4
-                            ),  # Fifth chart, centered
-                        ]
-
-                        with dashboard.Grid(layout):
-                            with elements("accuracy_chart"):
-                                st.plotly_chart(
-                                    create_gauge_chart(
-                                        data["NBest"][0]["PronunciationAssessment"][
-                                            "AccuracyScore"
-                                        ],
-                                        "Accuracy Score",
-                                    ),
-                                    use_container_width=True,
-                                )
-
-                            with elements("fluency_chart"):
-                                st.plotly_chart(
-                                    create_gauge_chart(
-                                        data["NBest"][0]["PronunciationAssessment"][
-                                            "FluencyScore"
-                                        ],
-                                        "Fluency Score",
-                                    ),
-                                    use_container_width=True,
-                                )
-
-                            # Second row
-                            with elements("completeness_chart"):
-                                st.plotly_chart(
-                                    create_gauge_chart(
-                                        data["NBest"][0]["PronunciationAssessment"][
-                                            "CompletenessScore"
-                                        ],
-                                        "Completeness Score",
-                                    ),
-                                    use_container_width=True,
-                                )
-
-                            with elements("prosody_chart"):
-                                st.plotly_chart(
-                                    create_gauge_chart(
-                                        data["NBest"][0]["PronunciationAssessment"][
-                                            "ProsodyScore"
-                                        ],
-                                        "Prosody Score",
-                                    ),
-                                    use_container_width=True,
-                                )
-
-                            # Third row
-                            with elements("pronunciation_chart"):
-                                st.plotly_chart(
-                                    create_gauge_chart(
-                                        data["NBest"][0]["PronunciationAssessment"][
-                                            "PronScore"
-                                        ],
-                                        "Pronunciation Score",
-                                    ),
-                                    use_container_width=True,
-                                )
+            if len(st.session_state['assessment']) > 0:
+                tabs = st.tabs([f"Assessment {idx + 1}" for idx in range(len(st.session_state['assessment']))])
+                
+                for idx, (tab, data) in enumerate(zip(tabs, st.session_state['assessment'])):
+                    with tab:
+                        with elements(f"assessment_{idx}"):  # Unique key for each assessment
+                            d = [
+                                {
+                                    "Score": "Accuracy",
+                                    f"Assessment {idx + 1}": data['NBest'][0]['PronunciationAssessment']['AccuracyScore'],
+                                },
+                                {
+                                    "Score": "Fluency",
+                                    f"Assessment {idx + 1}": data['NBest'][0]['PronunciationAssessment']['FluencyScore'],
+                                },
+                                {
+                                    "Score": "Completeness",
+                                    f"Assessment {idx + 1}": data['NBest'][0]['PronunciationAssessment']['CompletenessScore'],
+                                },
+                                {
+                                    "Score": "Prosody",
+                                    f"Assessment {idx + 1}": data['NBest'][0]['PronunciationAssessment']['ProsodyScore'],
+                                },
+                                {
+                                    "Score": "Pronunciation",
+                                    f"Assessment {idx + 1}": data['NBest'][0]['PronunciationAssessment']['PronScore'],
+                                }
+                            ]
+                            
+                            render_radar_chart(data=d, assessment_index=idx)
 
     # Transcript section at the bottom
     st.header("Transcript")
