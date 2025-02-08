@@ -248,9 +248,10 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
+            image = Image.open(st.session_state["logo.png"])
             col1, col2 = st.columns([1, 3])
             with col1:
-                st.image("logo.png", width=50)
+                st.image(image, width=50)
             with col2:
                 st.title("Bing Chillingual")
             if st.button("Dashboard", type="secondary"):
