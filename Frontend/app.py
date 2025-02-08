@@ -70,10 +70,16 @@ if "image_file" not in st.session_state: st.session_state["image_file"] = None
 if "audio_file" not in st.session_state: st.session_state["audio_file"] = None
 
 
+def empty_state():
+    st.session_state['conversation'] = ChatConversation(rounds=2, vocab=["你好", "再见", "谢谢"])
+    st.session_state['rounds'] = 0
+    st.session_state['transcript'] = []
+    st.session_state['assessment'] = []
+
 
 def chat_layout():    
     # Create the main layout
-    center_col, right_col = st.columns([3, 1])
+    center_col, right_col = st.columns([2, 1])
 
     with center_col:
         st.header("Video Content")
@@ -94,17 +100,14 @@ def chat_layout():
                 sys_reply = st.session_state['conversation'].respond()
                 st.session_state['conversation'].context.append("老师:" + sys_reply)
                 st.session_state['transcript'].append("System: " + sys_reply)
+                
+                st.session_state["rounds"] += 1
+                st.session_state["assessment"].append(json.loads(assessment))
                     
             elif st.session_state['rounds'] == st.session_state['conversation'].rounds:
                 sys_reply = st.session_state['conversation'].respond(if_end=True)
                 st.session_state['conversation'].context.append("老师:" + sys_reply)
                 st.session_state['transcript'].append("System: " + sys_reply)
-                
-                assess = st.session_state['conversation'].assess(st.session_state['assessment'])
-                feedback(assess)
-                
-                st.session_state['rounds'] = 0
-                st.session_state['assessment'] = []
             
             if not os.path.exists("Samples"):
                 os.mkdir("Samples")
@@ -114,9 +117,13 @@ def chat_layout():
                 "679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3"
             )["mp4_url"]
             st.video(url, autoplay=True)
+            
+            if st.session_state['rounds'] == st.session_state['conversation'].rounds:
+                assess = st.session_state['conversation'].assess(st.session_state['assessment'])
+                feedback(assess)
+                empty_state()
 
-            st.session_state["rounds"] += 1
-            st.session_state["assessment"].append(json.loads(assessment))
+            
 
     with right_col:
         st.header("Assessment")
@@ -203,7 +210,8 @@ def dashboard():
 def level_selector(user_level=5):
     for idx, level in enumerate(levels):
         if st.sidebar.button(
-            level, type="primary" if idx <= user_level else "secondary"
+            level, type="primary" if idx <= user_level else "secondary",
+            use_container_width=True
         ):
             st.session_state["current_level"] = level
 
