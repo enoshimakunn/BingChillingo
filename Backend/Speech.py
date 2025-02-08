@@ -16,7 +16,7 @@ class ASR:
         self.audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
         self.speech_recognizer = speechsdk.SpeechRecognizer(speech_config=self.speech_config)
         self.user_id = user_id
-        self.store = Store() if user_id else None
+        # self.store = Store() if user_id else None
         
     def recognize_from_microphone(self):
         print("Speak into your microphone.")
@@ -31,8 +31,8 @@ class ASR:
             print("Recognized: {}".format(recognized_text))
             
             # Store in database if user_id is provided
-            if self.store and self.user_id:
-                self.store.save_speech_record(self.user_id, recognized_text, confidence_score)
+            # if self.store and self.user_id:
+            #     self.store.save_speech_record(self.user_id, recognized_text, confidence_score)
                 
         elif speech_recognition_result.reason == speechsdk.ResultReason.NoMatch:
             print("No speech could be recognized: {}".format(speech_recognition_result.no_match_details))
@@ -45,9 +45,9 @@ class ASR:
         
         return recognized_text
 
-    def __del__(self):
-        if self.store:
-            self.store.close()
+    # def __del__(self):
+    #     if self.store:
+    #         self.store.close()
 
 class Analytics:
     def __init__(self):
@@ -59,10 +59,11 @@ class Analytics:
 
 if __name__ == "__main__":
     # Create a test user
-    store = Store()
-    user_id = store.get_or_create_user('test_user', 'test@example.com')
-    store.close()
+    # store = Store()
+    # user_id = store.get_or_create_user('test_user', 'test@example.com')
+    # store.close()
 
     # Test speech recognition
-    asr = ASR(user_id=user_id)
+    # asr = ASR(user_id=user_id)
+    asr = ASR()
     asr.recognize_from_microphone()

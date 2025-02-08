@@ -1,18 +1,26 @@
 import sys
 import os
+import io
 
 import streamlit as st
 import pandas as pd
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from Backend.Speech import ASR
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Backend.Speech import ASR
+from Backend.Chatbot import ChatConversation
 
-def create_layout():
+
+asr = ASR()
+
+if "conversation" not in st.session_state: st.session_state['conversation'] = ChatConversation(vocab=["你好", "再见", "谢谢"])
+if "rounds" not in st.session_state: st.session_state['rounds'] = 0
+if "transcript" not in st.session_state: st.session_state['transcript'] = []
+
+
+def create_layout():    
     # Set page config to wide mode
     st.set_page_config(layout="wide")
     
@@ -49,15 +57,30 @@ def create_layout():
         video_file = st.empty()
         st.video("https://example.com/sample-video.mp4")
         
-        # Video controls
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.button("Previous")
-        with col2:
-            st.button("Play/Pause")
-        with col3:
-            st.button("Next")
-    
+        
+        if st.session_state['rounds'] < st.session_state['conversation'].rounds:
+            sys_reply = st.session_state['conversation'].respond()
+            st.session_state['conversation'].context.append("老师:" + sys_reply)
+            st.session_state['transcript'].append("System: " + sys_reply)
+            
+        if st.button(f"Click to speak"):
+            stu_reply = asr.recognize_from_microphone()
+            st.session_state['transcript'].append("User: " + stu_reply)
+            st.session_state['conversation'].context.append("学生:" + stu_reply)
+            
+            if st.session_state['rounds'] < st.session_state['conversation'].rounds:
+                sys_reply = st.session_state['conversation'].respond()
+                st.session_state['conversation'].context.append("老师:" + sys_reply)
+                st.session_state['transcript'].append("System: " + sys_reply)
+                    
+            elif st.session_state['rounds'] == st.session_state['conversation'].rounds:
+                sys_reply = st.session_state['conversation'].respond(if_end=True)
+                st.session_state['conversation'].context.append("老师:" + sys_reply)
+                st.session_state['transcript'].append("System: " + sys_reply)
+                st.session_state['rounds'] = 0
+            
+            st.session_state['rounds'] += 1
+        
     with right_col:
         st.header("Commentary")
         # Add comments section
@@ -84,7 +107,7 @@ def create_layout():
         You can replace this with actual transcript data.
         The transcript can be synchronized with the video playback.
         """
-        st.text_area("Video Transcript", value=transcript_text, height=200, disabled=True)
+        st.text_area("Video Transcript", value=st.session_state['transcript'], height=200, disabled=True)
 
 def main():
     create_layout()
