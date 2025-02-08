@@ -214,7 +214,7 @@ def start_conversation(avatar_name, selected_level):
 
 
 def dashboard():
-    st.title("AIlingual - Your customized language teacher!")
+    st.title("Bing Chillingual - Your customized language teacher!")
     st.write(f'Welcome *{st.session_state["name"]}*')
 
     avatar_name = upload_avatar_name()
@@ -248,7 +248,15 @@ def create_layout():
 
     with st.sidebar:
         if st.session_state["authentication_status"]:
-            st.title("Bing Chillingo")
+            st.markdown(
+                """
+                <div style="display: flex; align-items: center;">
+                    <img src="logo.png" width="50" style="margin-right: 10px;">
+                    <h1 style="margin: 0px; font-size: 24px;">Bing Chillingual</h1>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
             if st.button("Dashboard", type="secondary"):
                 st.session_state["current_level"] = "Dashboard"
             st.write(f'Welcome *{st.session_state["name"]}*')
