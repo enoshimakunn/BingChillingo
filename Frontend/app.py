@@ -71,6 +71,8 @@ if "assessment" not in st.session_state: st.session_state['assessment'] = []
 if "current_level" not in st.session_state: st.session_state['current_level'] = "Dashboard"
 if "image_file" not in st.session_state: st.session_state["image_file"] = None
 if "audio_file" not in st.session_state: st.session_state["audio_file"] = None
+if "face_id" not in st.session_state: st.session_state["face_id"] = "679fc967-ae0c-4824-a426-03eea6161c72"
+if "voice_id" not in st.session_state: st.session_state["voice_id"] = "KYKd9of0fJ9XG7bcwvmD"
 
 
 def empty_state():
@@ -115,9 +117,9 @@ def chat_layout():
             if not os.path.exists("Samples"):
                 os.mkdir("Samples")
 
-            tts.generate(sys_reply, out_path="Samples/test.mp3")
+            tts.generate(sys_reply, voice_id=st.session_state["voice_id"], out_path="Samples/test.mp3")
             url = simli.audio_to_video(
-                "679fc967-ae0c-4824-a426-03eea6161c72", "Samples/test.mp3"
+                st.session_state["face_id"], "Samples/test.mp3"
             )["mp4_url"]
             st.video(url, autoplay=True)
             
