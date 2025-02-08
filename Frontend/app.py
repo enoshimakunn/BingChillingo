@@ -168,11 +168,18 @@ def chat_layout():
             disabled=True,
         )
 
+def upload_avatar_name():
+    avatar_name = st.text_input("🎭 Enter your favorite avatar name:", value=st.session_state.get("avatar_name", ""))
+    if avatar_name:
+        st.session_state["avatar_name"] = avatar_name
+        st.success(f"✅ Your avatar name is set to: **{avatar_name}**")
 
-def upload_and_display_image():
+    return avatar_name
+
+def upload_and_display_avatar_img():
 
     # Allow the user to upload a file (only jpg, jpeg, png are allowed)
-    image_file = st.file_uploader("Choose an image for your avatar...", type=["jpg", "jpeg", "png"])
+    image_file = st.file_uploader("Please choose an image for your favorite avatar...", type=["jpg", "jpeg", "png"])
 
     if image_file is not None:
         st.session_state["image_file"] = image_file
@@ -187,7 +194,7 @@ def upload_and_display_image():
 def upload_and_play_audio():
     
     # Allow the user to upload an audio file (only mp3, wav, ogg are allowed)
-    audio_file = st.file_uploader("Choose an audio sample for your voice...", type=["mp3", "wav", "ogg"])
+    audio_file = st.file_uploader("Please upload an audio sample for your favorite voice...", type=["mp3", "wav", "ogg", "m4a"])
 
     if audio_file is not None:
         st.session_state["audio_file"] = audio_file
@@ -196,13 +203,26 @@ def upload_and_play_audio():
         # Play the uploaded audio file
         st.audio(audio_file)
 
+def choose_language_level():
+    selected_level = st.selectbox("Choose your preferred conversation topic🎯", levels)
+    st.write(f"You have selected: {selected_level}")
+    return selected_level
+
+def start_conversation(avatar_name, selected_level):
+    if st.button(f"Start Conversation with {avatar_name}🚀"):
+        st.session_state["current_level"] = selected_level
+        st.experimental_rerun()
+
 
 def dashboard():
-    st.title("Bing Chillingo")
+    st.title("AIlingual - Your customized amazing language teacher!")
     st.write(f'Welcome *{st.session_state["name"]}*')
 
-    upload_and_display_image()
+    avatar_name = upload_avatar_name()
+    upload_and_display_avatar_img()
     upload_and_play_audio()
+    level = choose_language_level()
+    start_conversation(avatar_name, level)
 
 
 def level_selector(user_level=5):
