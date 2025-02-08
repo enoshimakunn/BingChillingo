@@ -63,11 +63,11 @@ if "rounds" not in st.session_state: st.session_state['rounds'] = 0
 if "transcript" not in st.session_state: st.session_state['transcript'] = []
 # if "assessment" not in st.session_state: st.session_state['assessment'] = [json.load(open('test.json', 'r'))]
 if "assessment" not in st.session_state: st.session_state['assessment'] = []
+if "current_level" not in st.session_state: st.session_state['current_level'] = levels[0]
 
-def create_layout():    
-    # Set page config to wide mode
-    st.set_page_config(layout="wide")
-    
+
+
+def chat_layout():    
     # Add title
     st.markdown("<h1 style='text-align: center;'>Your Title Here</h1>", unsafe_allow_html=True)
     
