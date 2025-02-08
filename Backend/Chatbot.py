@@ -17,7 +17,7 @@ class ChatbotWrapper:
             model="gemini-2.0-flash", contents=prompt
         )
         response = response.candidates[0].content.parts[0].text
-        response = response.split("：")[-1].strip()
+        response = response.split("：")[-1].split(":")[-1].strip()
         return response
 
 class ChatConversation:

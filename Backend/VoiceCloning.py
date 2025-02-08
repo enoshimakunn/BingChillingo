@@ -24,7 +24,7 @@ class GenSpeech:
     def __init__(self, api_key: str):
         self.xi_api_key = api_key
         
-    def generate(self, text: str, voice_id: str, out_path: str):
+    def generate(self, text: str, voice_id: str="KYKd9of0fJ9XG7bcwvmD", out_path: str="Samples/test.mp3"):
         client = ElevenLabs(api_key=self.xi_api_key)
         response = client.text_to_speech.convert(
             voice_id=voice_id,
@@ -36,6 +36,8 @@ class GenSpeech:
         with open(out_path, 'wb') as mp3_file:
             for chunk in response:
                 mp3_file.write(chunk)
+                
+        return response
         
 
 if __name__ == "__main__":

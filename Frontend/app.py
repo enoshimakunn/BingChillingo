@@ -7,13 +7,16 @@ import pandas as pd
 import os
 import sys
 
+from Env import XI_API_KEY
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Backend.Speech import ASR
 from Backend.Chatbot import ChatConversation
+from Backend.VoiceCloning import GenSpeech, PostVoice
 
 
 asr = ASR()
+tts = GenSpeech(XI_API_KEY)
 
 if "conversation" not in st.session_state: st.session_state['conversation'] = ChatConversation(vocab=["你好", "再见", "谢谢"])
 if "rounds" not in st.session_state: st.session_state['rounds'] = 0
@@ -58,11 +61,6 @@ def create_layout():
         st.video("https://example.com/sample-video.mp4")
         
         
-        if st.session_state['rounds'] < st.session_state['conversation'].rounds:
-            sys_reply = st.session_state['conversation'].respond()
-            st.session_state['conversation'].context.append("老师:" + sys_reply)
-            st.session_state['transcript'].append("System: " + sys_reply)
-            
         if st.button(f"Click to speak"):
             stu_reply = asr.recognize_from_microphone()
             st.session_state['transcript'].append("User: " + stu_reply)
@@ -78,6 +76,9 @@ def create_layout():
                 st.session_state['conversation'].context.append("老师:" + sys_reply)
                 st.session_state['transcript'].append("System: " + sys_reply)
                 st.session_state['rounds'] = 0
+            
+            tts.generate(sys_reply, out_path="Samples/test.mp3")
+            st.audio("Samples/test.mp3", format="audio/mp3", autoplay=True)
             
             st.session_state['rounds'] += 1
         
@@ -107,7 +108,7 @@ def create_layout():
         You can replace this with actual transcript data.
         The transcript can be synchronized with the video playback.
         """
-        st.text_area("Video Transcript", value=st.session_state['transcript'], height=200, disabled=True)
+        st.text_area("Video Transcript", value='\n'.join(st.session_state['transcript']), height=200, disabled=True)
 
 def main():
     create_layout()
