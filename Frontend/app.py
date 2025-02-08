@@ -145,10 +145,10 @@ def chat_layout():
             st.video(st.session_state["url"], autoplay=True)
             
         st.write("Last video URL: ", st.session_state.get("url", "No video URL generated yet"))
-        if st.checkbox("Click if Video does not Play"):
-            st.video(st.session_state["url"], autoplay=True)
-        else:
-            st.write("Click the button above to play the video")
+        if st.session_state["url"]:
+            if st.checkbox("Re-click if Video does not Play", value=True):
+                st.video(st.session_state["url"], autoplay=True)
+
 
     with right_col:
         st.header("Assessment")
